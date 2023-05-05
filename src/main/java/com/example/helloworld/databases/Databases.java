@@ -13,16 +13,27 @@ public class Databases {
     private static final Logger logger = LoggerFactory.getLogger(Databases.class);
 
     @Bean
-    CommandLineRunner initDatabase(ProductRepository productRepository) {
+    CommandLineRunner init(ProductRepository productRepository) {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
-                Product productA = new Product("Product A", 2023, 1000.0, "none");
-                Product productB = new Product("Product B", 2023, 1000.0, "none");
-
-                logger.info("insert data: " + productRepository.save(productA));
-                logger.info("insert data: " + productRepository.save(productB));
+//                Product productA = new Product("Product A", 2023, 1000.0, "none");
+//                Product productB = new Product("Product B", 2023, 1000.0, "none");
+//
+//                logger.info("insert data: " + productRepository.save(productA));
+//                logger.info("insert data: " + productRepository.save(productB));
             }
         };
     }
 }
+
+/*
+docker run -d --rm --name mysql-spring-boot-tutorial \
+-e MYSQL_ROOT_PASSWORD=123456 \
+-e MYSQL_ROOT_USER=quannh1 \
+-e MYSQL_ROOT_PASSWORD=123456 \
+-e MYSQL_DATABASE=test_db \
+-p 3309:3306 \
+--volume mysql-spring-boot-tutorial-volume:/var/lib/mysql \
+mysql:latest
+* */

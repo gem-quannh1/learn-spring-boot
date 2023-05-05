@@ -1,23 +1,39 @@
 package com.example.helloworld.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.Calendar;
 
 // Plain object java - POJO
 @Entity
+@Table(name = "tblProduct")
 public class Product {
     // This is primary key
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // AUTO INCREASE
+    @SequenceGenerator(
+            name = "product_sequence",
+            sequenceName = "product_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_sequence") // AUTO INCREASE
     private Long id;
+    // validate constraint
+    @Column(nullable = false, unique = true, length = 300)
     private String name;
     private int year;
     private double cost;
     private String imageUrl;
 
-    public Product() {}
+    // calculated field = transient
+    @Transient
+    private int age;
+
+    public int getAge() {
+        return Calendar.getInstance().get(Calendar.YEAR) - year;
+    }
+
+    public Product() {
+    }
 
     public Product(String name, int year, double cost, String imageUrl) {
         this.name = name;
@@ -74,6 +90,7 @@ public class Product {
                 ", year=" + year +
                 ", cost=" + cost +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", age=" + age +
                 '}';
     }
 }
