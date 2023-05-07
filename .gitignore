@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Igore uploaded file
+uploads/
