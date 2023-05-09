@@ -44,7 +44,7 @@ public class ImageStorageService implements IStorageService {
                 throw new RuntimeException("Fail to store empty file ");
             }
             // check file is image
-            if(!isImageFile(multipartFile)) {
+            if (!isImageFile(multipartFile)) {
                 throw new RuntimeException("You can only upload image");
             }
             // file must be <= 5mb
@@ -58,13 +58,10 @@ public class ImageStorageService implements IStorageService {
             String generatedFileName = UUID.randomUUID().toString().replace("-", "");
             String newFileName = generatedFileName + "." + fileExt;
 
-            Path destinationFilePath = this.storageFolder.resolve(
-                            Paths.get(newFileName))
-                    .normalize().toAbsolutePath();
+            Path destinationFilePath = this.storageFolder.resolve(Paths.get(newFileName)).normalize().toAbsolutePath();
 
             if (!destinationFilePath.getParent().equals(this.storageFolder.toAbsolutePath())) {
-                throw new RuntimeException(
-                        "Cannot store file outside current directory.");
+                throw new RuntimeException("Cannot store file outside current directory.");
             }
             try (InputStream inputStream = multipartFile.getInputStream()) {
                 Files.copy(inputStream, destinationFilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -77,7 +74,14 @@ public class ImageStorageService implements IStorageService {
 
     @Override
     public Stream<Path> loadAll() {
-        return null;
+        try {
+            // List all files in storageFolder
+            return Files.walk(this.storageFolder, 1)
+                    .filter(path -> !path.equals(this.storageFolder) && !path.toString().contains("._"))
+                    .map(this.storageFolder::relativize);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load stored files: ", e);
+        }
     }
 
     @Override
@@ -86,14 +90,11 @@ public class ImageStorageService implements IStorageService {
             Path file = storageFolder.resolve(fileName);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
-                 return StreamUtils.copyToByteArray(resource.getInputStream());
+                return StreamUtils.copyToByteArray(resource.getInputStream());
+            } else {
+                throw new RuntimeException("Could not read file: " + fileName);
             }
-            else {
-                throw new RuntimeException(
-                        "Could not read file: " + fileName);
-            }
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             throw new RuntimeException("Could not read file: " + fileName, exception);
         }
     }

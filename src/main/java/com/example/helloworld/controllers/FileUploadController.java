@@ -9,11 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.IOException;
+import java.util.List;
 
 @Controller
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/upload")
 public class FileUploadController {
 
 
@@ -25,7 +26,7 @@ public class FileUploadController {
     private ImageStorageService imageStorageService;
 
 
-    @PostMapping("/upload")
+    @PostMapping("")
     public ResponseEntity<ResponseObject> uploadFile(@RequestParam("file") MultipartFile multipartFile) {
         try {
             String generatedFileName = imageStorageService.storeFile(multipartFile);
@@ -49,6 +50,23 @@ public class FileUploadController {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bytes);
         } catch (Exception e) {
             return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/files")
+    public ResponseEntity<ResponseObject> getUploadedFiles() {
+        try {
+            List<String> urls = imageStorageService.loadAll().map(path -> {
+                // Convert fileName to url(send request "readDetailFile")
+                return MvcUriComponentsBuilder.fromMethodName(
+                        FileUploadController.class,
+                        "readDetailFile",
+                        path.getFileName().toString()
+                ).build().toUri().toString();
+            }).toList();
+            return ResponseEntity.ok(new ResponseObject("ok", "List file successfully", urls));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new ResponseObject("failed", "List file failed", new String[]{}));
         }
     }
 }
